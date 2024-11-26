@@ -1,0 +1,246 @@
+basePath: /api/v1
+definitions:
+  apiutils.HTTPError:
+    properties:
+      error:
+        type: string
+    type: object
+  songcontroller.createSongRequestBody:
+    properties:
+      group:
+        type: string
+      song:
+        type: string
+    required:
+    - group
+    - song
+    type: object
+  songcontroller.getSongCoupletsResponseBody:
+    properties:
+      songCouplets:
+        items:
+          type: string
+        type: array
+    type: object
+  songcontroller.getSongsResponseBody:
+    properties:
+      songs:
+        items:
+          $ref: '#/definitions/songcontroller.songDTO'
+        type: array
+    type: object
+  songcontroller.musicGroupDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  songcontroller.songDTO:
+    properties:
+      couplets:
+        items:
+          type: string
+        type: array
+      group:
+        $ref: '#/definitions/songcontroller.musicGroupDTO'
+      id:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      releaseDate:
+        type: string
+    type: object
+  songcontroller.updateSongRequestBody:
+    properties:
+      couplets:
+        items:
+          type: string
+        type: array
+      link:
+        type: string
+      name:
+        type: string
+      releaseDate:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Library of song texts and metadata
+  title: Song library
+  version: "1.0"
+paths:
+  /songs:
+    get:
+      parameters:
+      - description: Number of page to return
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: Number of items per returned page
+        in: query
+        name: per_page
+        required: true
+        type: integer
+      - description: Equality filter for name
+        in: query
+        name: song
+        type: string
+      - description: Equality filter for music group name
+        in: query
+        name: group
+        type: string
+      - description: Equality filter for link
+        in: query
+        name: link
+        type: string
+      - description: '''in'' filter for text'
+        in: query
+        name: text_contains
+        type: string
+      - description: '''in range'' filter for release data e.g., [12-03-2001;21-11-2024]'
+        in: query
+        name: release_date_range
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/songcontroller.getSongsResponseBody'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+      summary: Get songs
+      tags:
+      - song
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Song details
+        in: body
+        name: song_details
+        schema:
+          $ref: '#/definitions/songcontroller.createSongRequestBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success
+          schema:
+            $ref: '#/definitions/songcontroller.songDTO'
+        "409":
+          description: Song already exists
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+        "502":
+          description: Error from upstream service
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+      summary: Create a new song
+      tags:
+      - song
+  /songs/{songID}:
+    delete:
+      parameters:
+      - description: Song ID
+        in: path
+        name: songID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: nil
+        "404":
+          description: Song not found
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+      summary: Delete song
+      tags:
+      - song
+    put:
+      consumes:
+      - application/json
+      description: Update song by passing fields to be updated
+      parameters:
+      - description: Song ID
+        in: path
+        name: songID
+        required: true
+        type: string
+      - description: Song updating details
+        in: body
+        name: update_info
+        required: true
+        schema:
+          $ref: '#/definitions/songcontroller.updateSongRequestBody'
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: nil
+        "404":
+          description: Song not found
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+      summary: Update song
+      tags:
+      - song
+  /songs/{songID}/couplets:
+    get:
+      description: Get song text with optional pagination by couplets
+      parameters:
+      - description: Song ID
+        in: path
+        name: songID
+        required: true
+        type: string
+      - description: Number of page with couplets to return
+        in: query
+        name: couplets_page
+        required: true
+        type: integer
+      - description: Number of couplets per page to return
+        in: query
+        name: couplets_per_page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/songcontroller.getSongCoupletsResponseBody'
+        "404":
+          description: Song not found
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiutils.HTTPError'
+      summary: Get song text
+      tags:
+      - song
+swagger: "2.0"

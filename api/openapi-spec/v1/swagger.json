@@ -1,0 +1,375 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Library of song texts and metadata",
+        "title": "Song library",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/songs": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "song"
+                ],
+                "summary": "Get songs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of page to return",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per returned page",
+                        "name": "per_page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Equality filter for name",
+                        "name": "song",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Equality filter for music group name",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Equality filter for link",
+                        "name": "link",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "'in' filter for text",
+                        "name": "text_contains",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "'in range' filter for release data e.g., [12-03-2001;21-11-2024]",
+                        "name": "release_date_range",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/songcontroller.getSongsResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "song"
+                ],
+                "summary": "Create a new song",
+                "parameters": [
+                    {
+                        "description": "Song details",
+                        "name": "song_details",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/songcontroller.createSongRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/songcontroller.songDTO"
+                        }
+                    },
+                    "409": {
+                        "description": "Song already exists",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    },
+                    "502": {
+                        "description": "Error from upstream service",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/songs/{songID}": {
+            "put": {
+                "description": "Update song by passing fields to be updated",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "song"
+                ],
+                "summary": "Update song",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Song ID",
+                        "name": "songID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Song updating details",
+                        "name": "update_info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/songcontroller.updateSongRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "nil"
+                        }
+                    },
+                    "404": {
+                        "description": "Song not found",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "song"
+                ],
+                "summary": "Delete song",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Song ID",
+                        "name": "songID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "nil"
+                        }
+                    },
+                    "404": {
+                        "description": "Song not found",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/songs/{songID}/couplets": {
+            "get": {
+                "description": "Get song text with optional pagination by couplets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "song"
+                ],
+                "summary": "Get song text",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Song ID",
+                        "name": "songID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of page with couplets to return",
+                        "name": "couplets_page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of couplets per page to return",
+                        "name": "couplets_per_page",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/songcontroller.getSongCoupletsResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Song not found",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apiutils.HTTPError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "apiutils.HTTPError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "songcontroller.createSongRequestBody": {
+            "type": "object",
+            "required": [
+                "group",
+                "song"
+            ],
+            "properties": {
+                "group": {
+                    "type": "string"
+                },
+                "song": {
+                    "type": "string"
+                }
+            }
+        },
+        "songcontroller.getSongCoupletsResponseBody": {
+            "type": "object",
+            "properties": {
+                "songCouplets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "songcontroller.getSongsResponseBody": {
+            "type": "object",
+            "properties": {
+                "songs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/songcontroller.songDTO"
+                    }
+                }
+            }
+        },
+        "songcontroller.musicGroupDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "songcontroller.songDTO": {
+            "type": "object",
+            "properties": {
+                "couplets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "group": {
+                    "$ref": "#/definitions/songcontroller.musicGroupDTO"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "releaseDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "songcontroller.updateSongRequestBody": {
+            "type": "object",
+            "properties": {
+                "couplets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "link": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "releaseDate": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
