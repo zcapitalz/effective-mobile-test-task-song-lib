@@ -128,20 +128,20 @@ func runServer(srv *http.Server) {
 
 func setRequestIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		traceID := ksuid.New().String()
-		c.Set("requestID", traceID)
+		requestID := ksuid.New().String()
+		c.Set("requestID", requestID)
 
 		c.Next()
 
-		c.Header("X-Request-ID", traceID)
+		c.Header("X-Request-ID", requestID)
 	}
 }
 
 func setLoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger := slog.Default()
-		if traceID, ok := c.Get("requestID"); ok {
-			logger = logger.With("requestID", traceID.(string))
+		if requestID, ok := c.Get("requestID"); ok {
+			logger = logger.With("requestID", requestID.(string))
 		}
 		c.Set("logger", logger)
 
